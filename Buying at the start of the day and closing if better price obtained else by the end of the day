@@ -1,0 +1,33 @@
+def initialize(context):
+    set_benchmark(sid(39840))
+    context.security = [sid(39840)]
+    
+    schedule_function(  
+        func=close_all,  
+        date_rule=date_rules.every_day(),  
+        time_rule=time_rules.market_close(minutes=25)  
+    )
+    
+    schedule_function(  
+        func=open_all,  
+        date_rule=date_rules.every_day(),  
+        time_rule=time_rules.market_open(minutes=30)
+    )
+
+def open_all(context, data):
+    for s in context.security:  
+        order_target_percent(s, 1)
+        
+def handle_data(context, data):
+    for s in context.security:
+        price = data.current(s, 'price')
+        cost_basis = context.portfolio.positions[s].cost_basis
+
+        if price > cost_basis:  
+            order_target_percent(s, 0)
+
+def close_all(context, data):
+    for s in context.security:  
+        order_target_percent(s, 0)
+            
+        record(leverage = context.account.leverage)
