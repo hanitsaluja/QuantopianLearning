@@ -1,0 +1,27 @@
+from quantopian.pipeline.data.factset.estimates import Actuals
+from quantopian.pipeline import Pipeline
+from quantopian.research import run_pipeline
+from quantopian.pipeline.domain import US_EQUITIES
+from quantopian.pipeline.filters import QTradableStocksUS
+QTU = QTradableStocksUS()
+fq0_eps_act = Actuals.slice('EPS', 'qf', 0)
+
+
+fq0_eps_act_actual_value = fq0_eps_act.actual_value.latest
+fq0_eps_act_publication_date = fq0_eps_act.publication_date.latest
+fq0_eps_act_asof_date = fq0_eps_act.asof_date.latest
+fq0_eps_act_currency = fq0_eps_act.currency.latest
+
+pipe = Pipeline(
+    columns={
+        'actual_value': fq0_eps_act_actual_value,
+        'publication_date': fq0_eps_act.publication_date.latest,
+        #'asof_date': fq0_eps_act_asof_date.latest,
+        #'currency':fq0_eps_act_currency.latest,
+    },
+    domain=US_EQUITIES,
+    
+)
+    
+df = run_pipeline(pipe, '2015-05-05', '2016-05-05')
+print(df.head())
