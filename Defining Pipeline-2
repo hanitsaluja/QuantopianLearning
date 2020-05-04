@@ -1,0 +1,29 @@
+from quantopian.pipeline import Pipeline
+from quantopian.research import run_pipeline
+from quantopian.pipeline.data.builtin import USEquityPricing
+from quantopian.pipeline.factors import SimpleMovingAverage
+from quantopian.pipeline.data.factset.estimates import Actuals
+from quantopian.pipeline.data.factset.estimates import PeriodicConsensus
+fq0_eps_act = Actuals.slice('EPS', 'qf', 0)
+fq0_eps_estimate=PeriodicConsensus.slice(item='EPS', freq='qf', period_offset=1)
+def make_pipeline():
+    fq0_eps_act_actual_value = fq0_eps_act.actual_value.latest
+    fq0_eps_act_publication_date = fq0_eps_act.publication_date.latest
+    fq0_eps_act_asof_date = fq0_eps_act.asof_date.latest
+    fq0_eps_act_currency = fq0_eps_act.currency.latest
+    fq0_eps_estiamte_actual_value = fq0_eps_estimate.mean.latest
+    Surprise = (fq0_eps_estiamte_actual_value-fq0_eps_act_actual_value)
+    NaN_securities_removal = (Surprise.notnull())
+    Securities_outperfoming_estimates = Surprise > 0
+    isTradable = NaN_securities_removal & Securities_outperfoming_estimates
+    return Pipeline(
+            columns={
+        'Result': Surprise,
+        'Result_date': fq0_eps_act_asof_date,
+        'currency': fq0_eps_act_currency
+        },
+            screen=isTradable)
+my_pipe = make_pipeline()
+latest_close = USEquityPricing.close.latest
+result = run_pipeline(my_pipe, '2015-05-05', '2015-05-05')
+result.head()
