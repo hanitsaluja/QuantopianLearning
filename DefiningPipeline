@@ -3,7 +3,6 @@ from quantopian.research import run_pipeline
 from quantopian.pipeline.data.builtin import USEquityPricing
 from quantopian.pipeline.factors import SimpleMovingAverage
 from quantopian.pipeline.data.factset.estimates import Actuals
-QTU = QTradableStocksUS()
 fq0_eps_act = Actuals.slice('EPS', 'qf', 0)
 def make_pipeline():
     fq0_eps_act_actual_value = fq0_eps_act.actual_value.latest
